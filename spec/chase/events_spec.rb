@@ -18,6 +18,7 @@ RSpec.describe Chase::Events do
       subject.on(:bad_event) { dummy.call(:x, 1) }
       subject.on(:good_event) { |a, b| dummy.call(a, b) }
       expect(dummy).to receive(:call).with(3, :y)
+      expect(dummy).to_not receive(:call).with(:x, 1)
       subject.emit(:good_event, 3, :y)
     end
 

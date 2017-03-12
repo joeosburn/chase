@@ -12,7 +12,7 @@ module Chase
     private
 
     def __events
-      @__events ||= Hash.new([])
+      @__events ||= Hash.new { |hash, key| hash[key] = [] }
     end
   end
 end
