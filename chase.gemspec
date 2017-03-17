@@ -18,6 +18,7 @@ Gem::Specification.new do |spec|
   spec.test_files = Dir['spec/**/*']
 
   spec.add_dependency 'eventmachine', '~> 1.2.0'
+  spec.add_dependency 'http-parser-lite', '~> 0.6.0'
 
   spec.add_development_dependency 'rspec', '~> 3.5.0'
 end
