@@ -86,6 +86,7 @@ module Chase
 
     def write_headers
       write "HTTP/1.1 #{STATUS_CODES[status] || '200 OK'}\r\n"
+      headers['Content-Length'] ||= content.bytesize
       headers.each { |key, value| write_header(key, value) }
     end
 
