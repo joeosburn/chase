@@ -86,7 +86,15 @@ module Chase
 
     def write_headers
       write "HTTP/1.1 #{STATUS_CODES[status] || '200 OK'}\r\n"
-      headers.each { |key, value| write("#{key}: #{value}\r\n") }
+      headers.each { |key, value| write_header(key, value) }
+    end
+
+    def write_header(key, value)
+      if value.is_a?(Array)
+        value.each { |subvalue| write_header(key, subvalue) }
+      else
+        write("#{key}: #{value}\r\n")
+      end
     end
   end
 end
