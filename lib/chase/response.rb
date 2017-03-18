@@ -60,6 +60,10 @@ module Chase
       @content = value.to_s
     end
 
+    def headers=(value)
+      @headers = value.to_h
+    end
+
     def flush
       return if flushed?
 
