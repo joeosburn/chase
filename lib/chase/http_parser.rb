@@ -14,7 +14,7 @@ module Chase
         parser.on_url do |url|
           raise HTTP::Parser::Error, 'Invalid method' unless VALID_METHODS.include?(http_method)
 
-          set_env('HTTP_METHOD', http_method)
+          set_env('REQUEST_METHOD', http_method)
           set_env('REQUEST_URI', url)
           matches = url.match(/^(([^:\/?#]+):)?(\/\/([^\/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?/)
           matches ||= Hash.new('')

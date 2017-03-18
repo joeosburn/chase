@@ -49,7 +49,7 @@ RSpec.describe Chase::Server do
 
             Some-Post-Content=Value&Some-Other=abc2
           eos
-          expect(subject.request.env['HTTP_METHOD']).to eq('PATCH')
+          expect(subject.request.env['REQUEST_METHOD']).to eq('PATCH')
           expect(subject.request.env['REQUEST_URI']).to eq('https://www.google.com/chase/request?key=value&other=123')
           expect(subject.request.env['PROTOCOL']).to eq('https')
           expect(subject.request.env['PATH_INFO']).to eq('/chase/request')

@@ -31,7 +31,7 @@ module Chase
 
     def parse_request(data)
       http_parser << data
-      raise ServerError unless request.env['HTTP_METHOD']
+      raise ServerError unless request.env['REQUEST_METHOD']
     end
 
     def prepare_response
