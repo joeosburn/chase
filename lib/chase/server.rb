@@ -9,15 +9,13 @@ module Chase
     include HttpParser
 
     def receive_data(data)
-      parse_request data
-      prepare_response
-      handle
+      http_parser << data
     rescue ServerError, HTTP::Parser::Error
       send_error('400 Bad Request')
     end
 
     def request
-      @request ||= Request.new
+      @request ||= prepare_request
     end
 
     def response
@@ -29,9 +27,14 @@ module Chase
       close_connection_after_writing
     end
 
-    def parse_request(data)
-      http_parser << data
-      raise ServerError unless request.env['REQUEST_METHOD']
+    def prepare_request
+      Request.new.tap do |request|
+        request.on(:created) do
+          raise ServerError unless request.env['REQUEST_METHOD']
+          prepare_response
+          handle
+        end
+      end
     end
 
     def prepare_response

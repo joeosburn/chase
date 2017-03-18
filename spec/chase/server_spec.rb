@@ -24,7 +24,7 @@ RSpec.describe Chase::Server do
     context 'valid request' do
       it 'calls #handle' do
         expect(subject).to receive(:handle)
-        subject.receive_data('GET / HTTP/1.1')
+        subject.receive_data("GET / HTTP/1.1\r\n\r\n\0")
       end
 
       it 'creates a request object' do
@@ -49,6 +49,7 @@ RSpec.describe Chase::Server do
 
             Some-Post-Content=Value&Some-Other=abc2
           eos
+
           expect(subject.request.env['REQUEST_METHOD']).to eq('PATCH')
           expect(subject.request.env['REQUEST_URI']).to eq('https://www.google.com/chase/request?key=value&other=123')
           expect(subject.request.env['PROTOCOL']).to eq('https')

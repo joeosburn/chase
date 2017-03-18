@@ -37,11 +37,12 @@ module Chase
 
         parser.on_message_begin do
           set_env('HTTP_COOKIE', '')
+          set_env('POST_CONTENT', '')
         end
 
-        # parser.on_message_complete do
-        #   puts "message complete"
-        # end
+        parser.on_message_complete do
+          request.emit(:created)
+        end
       end
     end
 
