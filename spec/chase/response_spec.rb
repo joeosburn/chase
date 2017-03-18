@@ -15,7 +15,7 @@ RSpec.describe Chase::Response do
 
     it 'emits the headers and content' do
       output = ''
-      subject.on(:send) { |data| output += data }
+      subject.on(:write) { |data| output += data }
 
       subject.flush
 
@@ -33,8 +33,8 @@ RSpec.describe Chase::Response do
 
       it 'does not emit content again' do
         output = ''
-        subject.on(:send) { |data| output += data }
-        
+        subject.on(:write) { |data| output += data }
+
         subject.flush
         expect(output).to eq('')
       end

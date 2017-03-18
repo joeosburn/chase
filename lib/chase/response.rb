@@ -63,9 +63,9 @@ module Chase
     def flush
       return if flushed?
 
-      send_headers
-      send("\r\n")
-      send(content)
+      write_headers
+      write("\r\n")
+      write(content)
 
       emit(:flushed)
     end
@@ -76,13 +76,13 @@ module Chase
 
     private
 
-    def send(data)
-      emit(:send, data)
+    def write(data)
+      emit(:write, data)
     end
 
-    def send_headers
-      send "HTTP/1.1 #{STATUS_CODES[status] || '200 OK'}\r\n"
-      headers.each { |key, value| send("#{key}: #{value}\r\n") }
+    def write_headers
+      write "HTTP/1.1 #{STATUS_CODES[status] || '200 OK'}\r\n"
+      headers.each { |key, value| write("#{key}: #{value}\r\n") }
     end
   end
 end
