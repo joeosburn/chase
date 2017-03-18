@@ -35,10 +35,10 @@ module Chase
 
         parser.on_body { |body| set_env('POST_CONTENT', body) }
 
-        # parser.on_message_begin do
-        #   puts "message begin"
-        # end
-        #
+        parser.on_message_begin do
+          set_env('HTTP_COOKIE', '')
+        end
+
         # parser.on_message_complete do
         #   puts "message complete"
         # end
