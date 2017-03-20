@@ -1,5 +1,4 @@
 require 'chase/events'
 require 'chase/http_parser'
 require 'chase/server'
-require 'chase/request'
 require 'chase/response'

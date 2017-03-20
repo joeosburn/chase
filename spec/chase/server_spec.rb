@@ -27,17 +27,12 @@ RSpec.describe Chase::Server do
         subject.receive_data("GET / HTTP/1.1\r\n\r\n\0")
       end
 
-      it 'creates a request object' do
-        subject.receive_data('GET / HTTP/1.1')
-        expect(subject.request).to be_a(Chase::Request)
-      end
-
       it 'creates a response object' do
         subject.receive_data('GET / HTTP/1.1')
         expect(subject.response).to be_a(Chase::Response)
       end
 
-      describe 'the request object' do
+      describe 'the env object' do
         it 'sets env and header variables' do
           subject.receive_data(<<~eos)
             PATCH https://www.google.com/chase/request?key=value&other=123 HTTP/1.1
@@ -46,21 +41,23 @@ RSpec.describe Chase::Server do
             Cookie: cookie-content
             If-None-Match: *
             Random-Header: Value
+            Other: Something
 
             Some-Post-Content=Value&Some-Other=abc2
           eos
 
-          expect(subject.request.env['REQUEST_METHOD']).to eq('PATCH')
-          expect(subject.request.env['REQUEST_URI']).to eq('https://www.google.com/chase/request?key=value&other=123')
-          expect(subject.request.env['PROTOCOL']).to eq('https')
-          expect(subject.request.env['PATH_INFO']).to eq('/chase/request')
-          expect(subject.request.env['QUERY_STRING']).to eq('key=value&other=123')
-          expect(subject.request.env['CONTENT_TYPE']).to eq('text/plain')
-          expect(subject.request.env['CONTENT_LENGTH']).to eq('45')
-          expect(subject.request.env['HTTP_COOKIE']).to eq('cookie-content')
-          expect(subject.request.env['IF_NONE_MATCH']).to eq('*')
-          expect(subject.request.env['POST_CONTENT']).to eq("Some-Post-Content=Value&Some-Other=abc2\n")
-          expect(subject.request.headers['Random-Header']).to eq('Value')
+          expect(subject.env['HTTP_REQUEST_METHOD']).to eq('PATCH')
+          expect(subject.env['HTTP_REQUEST_URI']).to eq('https://www.google.com/chase/request?key=value&other=123')
+          expect(subject.env['HTTP_PROTOCOL']).to eq('https')
+          expect(subject.env['HTTP_PATH_INFO']).to eq('/chase/request')
+          expect(subject.env['HTTP_QUERY_STRING']).to eq('key=value&other=123')
+          expect(subject.env['HTTP_CONTENT_TYPE']).to eq('text/plain')
+          expect(subject.env['HTTP_CONTENT_LENGTH']).to eq('45')
+          expect(subject.env['HTTP_COOKIE']).to eq('cookie-content')
+          expect(subject.env['HTTP_IF_NONE_MATCH']).to eq('*')
+          expect(subject.env['HTTP_POST_CONTENT']).to eq("Some-Post-Content=Value&Some-Other=abc2\n")
+          expect(subject.env['HTTP_HEADERS']['Random-Header']).to eq('Value')
+          expect(subject.env['HTTP_HEADERS']['Other']).to eq('Something')
         end
       end
     end
