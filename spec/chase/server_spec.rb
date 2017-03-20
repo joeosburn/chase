@@ -27,6 +27,17 @@ RSpec.describe Chase::Server do
         subject.receive_data("GET / HTTP/1.1\r\n\r\n\0")
       end
 
+      it 'receives multiple blocks of data' do
+        subject.receive_data("GET / HTTP/1.1\r\n")
+        subject.receive_data("Content-Type: text/plain\r\n")
+        subject.receive_data("Cookie: cookie-content\r\n")
+
+        expect(subject.env['HTTP_REQUEST_METHOD']).to eq('GET')
+        expect(subject.env['HTTP_REQUEST_URI']).to eq('/')
+        expect(subject.env['HTTP_CONTENT_TYPE']).to eq('text/plain')
+        expect(subject.env['HTTP_COOKIE']).to eq('cookie-content')
+      end
+
       it 'creates a response object' do
         subject.receive_data('GET / HTTP/1.1')
         expect(subject.response).to be_a(Chase::Response)
