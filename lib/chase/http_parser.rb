@@ -7,6 +7,10 @@ module Chase
     MAPPED_HEADERS = { 'cookie' => 'HTTP_COOKIE', 'if-none-match' => 'HTTP_IF_NONE_MATCH',
                        'content-type' => 'HTTP_CONTENT_TYPE', 'content-length' => 'HTTP_CONTENT_LENGTH' }.freeze
 
+    def finish_request
+      raise NotImplementedError
+    end
+
     def http_parser
       @parser ||= HTTP::Parser.new.tap do |parser|
         parser.on_message_begin do
@@ -20,8 +24,7 @@ module Chase
 
         parser.on_message_complete do
           raise HTTP::Parser::Error, 'Missing request method' unless env['HTTP_REQUEST_METHOD']
-          prepare_response
-          handle
+          finish_request
         end
 
         parser.on_url do |url|

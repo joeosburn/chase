@@ -11,6 +11,11 @@ module Chase
       send_error('400 Bad Request')
     end
 
+    def finish_request
+      prepare_response
+      handle
+    end
+
     def env
       @env ||= Hash.new
     end
