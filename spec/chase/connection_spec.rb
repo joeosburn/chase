@@ -1,16 +1,19 @@
 require 'spec_helper'
 
-RSpec.describe Chase::Server do
+RSpec.describe Chase::Connection do
   let(:included_class) do
     Class.new do
-      include Chase::Server
+      include Chase::Connection
 
       def handle; end
       def send_data(_data); end
       def close_connection_after_writing; end
     end
   end
+  let(:server) { double('Server') }
   subject { included_class.new }
+
+  before { subject.server = server }
 
   describe '#receive_data' do
     context 'invalid request' do
@@ -22,8 +25,8 @@ RSpec.describe Chase::Server do
     end
 
     context 'valid request' do
-      it 'calls #handle' do
-        expect(subject).to receive(:handle)
+      it 'calls #handle_request on the server' do
+        expect(server).to receive(:handle_request)
         subject.receive_data("GET / HTTP/1.1\r\n\r\n\0")
       end
 
@@ -36,11 +39,6 @@ RSpec.describe Chase::Server do
         expect(subject.env['HTTP_REQUEST_URI']).to eq('/')
         expect(subject.env['HTTP_CONTENT_TYPE']).to eq('text/plain')
         expect(subject.env['HTTP_COOKIE']).to eq('cookie-content')
-      end
-
-      it 'creates a response object' do
-        subject.receive_data('GET / HTTP/1.1')
-        expect(subject.response).to be_a(Chase::Response)
       end
 
       describe 'the env object' do

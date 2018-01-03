@@ -45,9 +45,10 @@ module Chase
     }.freeze
 
     attr_accessor :status
-    attr_reader :content, :headers
+    attr_reader :content, :headers, :env
 
-    def initialize
+    def initialize(env)
+      @env = env
       @content = ''
       @headers = {}
     end
@@ -61,33 +62,30 @@ module Chase
     end
 
     def flush
-      return if flushed?
+      headers['Content-Length'] ||= content.bytesize
+      send("HTTP/1.1 #{STATUS_CODES[status] || '200 OK'}\r\n")
+      send(headers.map { |key, value| formatted_header(key, value) }.join)
+      send("\r\n")
+      send(content)
 
-      write_headers
-      write("\r\n")
-      write(content)
-    end
-
-    def flushed?
-      @flushed ||= false
+      handler.close_connection_after_writing
     end
 
     private
 
-    def write(data)
+    def send(data)
+      handler.send_data(data)
     end
 
-    def write_headers
-      write "HTTP/1.1 #{STATUS_CODES[status] || '200 OK'}\r\n"
-      headers['Content-Length'] ||= content.bytesize
-      headers.each { |key, value| write_header(key, value) }
+    def handler
+      env['HANDLER']
     end
 
-    def write_header(key, value)
+    def formatted_header(key, value)
       if value.is_a?(Array)
-        value.each { |subvalue| write_header(key, subvalue) }
+        value.map { |subvalue| formatted_header(key, subvalue) }.join
       else
-        write("#{key}: #{value}\r\n")
+        "#{key}: #{value}\r\n"
       end
     end
   end

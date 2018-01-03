@@ -1,15 +1,28 @@
 require 'http-parser-lite'
 
 module Chase
-  # Handle parsing of incoming http requests
-  module HttpParser
+  # Connection for incoming http requests
+  module Connection
+    attr_accessor :server
+
+    def receive_data(data)
+      http_parser << data
+    rescue HTTP::Parser::Error
+      send_error('400 Bad Request')
+    end
+
+    def env
+      @env ||= {'HANDLER' => self}
+    end
+
+    def send_error(status_code)
+      send_data "HTTP/1.1 #{status_code}\r\nConnection: close\r\nContent-Type: text/plain\r\n"
+      close_connection_after_writing
+    end
+
     VALID_METHODS = %w(GET POST PUT DELETE PATCH HEAD OPTIONS).freeze
     MAPPED_HEADERS = { 'cookie' => 'HTTP_COOKIE', 'if-none-match' => 'HTTP_IF_NONE_MATCH',
                        'content-type' => 'HTTP_CONTENT_TYPE', 'content-length' => 'HTTP_CONTENT_LENGTH' }.freeze
-
-    def finish_request
-      raise NotImplementedError
-    end
 
     def http_parser
       @parser ||= HTTP::Parser.new.tap do |parser|
@@ -24,7 +37,7 @@ module Chase
 
         parser.on_message_complete do
           raise HTTP::Parser::Error, 'Missing request method' unless env['HTTP_REQUEST_METHOD']
-          finish_request
+          server.handle_request(env)
         end
 
         parser.on_url do |url|

@@ -1,35 +1,29 @@
 require 'eventmachine'
 
 module Chase
-  # HTTP Server Module
-  module Server
-    include HttpParser
+  # HTTP Server
+  class Server
+    attr_reader :ip_address, :port, :handler
 
-    def receive_data(data)
-      http_parser << data
-    rescue HTTP::Parser::Error
-      send_error('400 Bad Request')
+    def initialize(ip_address, port, &handler)
+      @ip_address = ip_address
+      @port = port
+      @handler = handler
     end
 
-    def finish_request
-      prepare_response
-      handle
+    def start(&block)
+      @em = EventMachine.start_server(ip_address, port, Connection) do |connection|
+        connection.server = self
+        yield connection if block_given?
+      end
     end
 
-    def env
-      @env ||= Hash.new
+    def stop
+      EventMachine.stop_server(@em)
     end
 
-    def response
-      @response ||= Response.new
-    end
-
-    def send_error(status_code)
-      send_data "HTTP/1.1 #{status_code}\r\nConnection: close\r\nContent-Type: text/plain\r\n"
-      close_connection_after_writing
-    end
-
-    def prepare_response
+    def handle_request(env)
+      handler.call(Request.new(env), Response.new(env))
     end
   end
 end
