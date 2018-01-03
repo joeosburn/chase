@@ -1,8 +1,6 @@
 module Chase
   # HTTP Response Class
   class Response
-    include Events
-
     STATUS_CODES = {
       100 => '100 Continue',
       101 => '101 Switching Protocols',
@@ -52,8 +50,6 @@ module Chase
     def initialize
       @content = ''
       @headers = {}
-
-      on(:flushed) { @flushed = true }
     end
 
     def content=(value)
@@ -70,8 +66,6 @@ module Chase
       write_headers
       write("\r\n")
       write(content)
-
-      emit(:flushed)
     end
 
     def flushed?
@@ -81,7 +75,6 @@ module Chase
     private
 
     def write(data)
-      emit(:write, data)
     end
 
     def write_headers

@@ -30,8 +30,6 @@ module Chase
     end
 
     def prepare_response
-      response.on(:flushed) { close_connection_after_writing }
-      response.on(:write) { |data| send_data(data) }
     end
   end
 end
